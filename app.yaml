@@ -1,2 +1,2 @@
 runtime: python37
-entrypoint: sudo -E uvicorn main:app --host 0.0.0.0 -post 80
+entrypoint: gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker
