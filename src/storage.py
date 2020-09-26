@@ -27,28 +27,31 @@ def init_cloud_storage(project_id: str) -> Client:
 @storage_router.post("/upload")
 async def upload_picture(file: bytes = File(None, media_type="image/jpeg")):
     """
-
+    Uploads image from phone to server and saves it to bucket
     Args:
-        file ():
+        file (bytes): the image taken from camera app encoded in bytes
 
     Returns:
-
+        response (str): JSON Response with uuid of the file uploaded
     """
     try:
         if file is None:
             raise HTTPException(status_code=422, detail="Empty image sent")
 
         else:
+            # Initializes the Storage client
             storage_client = Client(project=creds.project_id)
             bucket = storage_client.get_bucket(creds.bucket_id)
 
+            # Generates a unique identifier for storage
             img_uuid = str(uuid.uuid4())[0:6]
             blob = bucket.blob(img_uuid)
 
+            # Decodes the base64 encoded bytearry of incoming image
             content = base64.b64decode(file)
 
+            # Takes base64 decoded image and converts to image/jpeg
             blob.upload_from_string(data=content, content_type="image/jpeg")
-
 
             return {"detail": img_uuid}
     except GoogleCloudError as e:
