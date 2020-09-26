@@ -24,7 +24,15 @@ def init_cloud_storage(project_id: str) -> Client:
 
 
 @storage_router.post("/upload")
-async def upload_picture(file: UploadFile = File(None, media_type="image/jpeg")):
+async def upload_picture(file: bytes = File(None, media_type="image/jpeg")):
+    """
+
+    Args:
+        file ():
+
+    Returns:
+
+    """
     try:
 
         content = await file.read()
