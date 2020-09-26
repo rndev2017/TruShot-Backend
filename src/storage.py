@@ -1,5 +1,6 @@
 import uuid
 import creds
+import base64
 from fastapi import APIRouter, File, UploadFile, HTTPException
 from google.cloud.storage import Client, Blob
 from google.cloud.exceptions import GoogleCloudError
@@ -34,19 +35,22 @@ async def upload_picture(file: bytes = File(None, media_type="image/jpeg")):
 
     """
     try:
+        if file is None:
+            raise HTTPException(status_code=422, detail="Empty image sent")
 
-        content = await file.read()
+        else:
+            storage_client = Client(project=creds.project_id)
+            bucket = storage_client.get_bucket(creds.bucket_id)
 
-        storage_client = Client(project=creds.project_id)
-        bucket = storage_client.get_bucket(creds.bucket_id)
+            img_uuid = str(uuid.uuid4())[0:6]
+            blob = bucket.blob(img_uuid)
 
-        img_uuid = str(uuid.uuid4())[0:6]
-        blob = bucket.blob(img_uuid)
+            content = base64.b64decode(file)
 
-        blob.upload_from_string(data=content, content_type="image/jpeg")
+            blob.upload_from_string(data=content, content_type="image/jpeg")
 
 
-        return {"detail": f"File {img_uuid} uploaded to {bucket.name}"}
+            return {"detail": f"File {img_uuid} uploaded to {bucket.name}"}
     except GoogleCloudError as e:
         raise HTTPException(detail=str(e), status_code=500)
 
