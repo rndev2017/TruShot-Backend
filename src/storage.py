@@ -50,7 +50,7 @@ async def upload_picture(file: bytes = File(None, media_type="image/jpeg")):
             blob.upload_from_string(data=content, content_type="image/jpeg")
 
 
-            return {"detail": f"File {img_uuid} uploaded to {bucket.name}"}
+            return {"detail": img_uuid}
     except GoogleCloudError as e:
         raise HTTPException(detail=str(e), status_code=500)
 
